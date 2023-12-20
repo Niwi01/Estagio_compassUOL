@@ -1,0 +1,69 @@
+import sys
+from awsglue.transforms import *
+from awsglue.utils import getResolvedOptions
+from pyspark.context import SparkContext
+from awsglue.context import GlueContext
+from awsglue.job import Job
+
+## @params: [JOB_NAME]
+args = getResolvedOptions(sys.argv, ['JOB_NAME'])
+
+sc = SparkContext()
+glueContext = GlueContext(sc)
+spark = glueContext.spark_session
+job = Job(glueContext)
+job.init(args['JOB_NAME'], args)
+
+#primeira tabela
+database = 'filme'
+table = 'refinando'
+
+df = glueContext.create_dynamic_frame.from_catalog(database=database, table_name=table, transformation_ctx="dynamic_frame")
+
+glueContext.write_dynamic_frame.from_options(
+    frame = df,
+    connection_type = "s3",
+    connection_options = {"path": 's3://data-lake-niwea/Refined/2023/06/15/tabela01/'},
+    format = "parquet",
+    transformation_ctx = "parquet_output")
+
+
+#segunda tabela
+database2 = 'filme'
+table2 = 'filmes'
+
+df2 = glueContext.create_dynamic_frame.from_catalog(database=database2, table_name=table2, transformation_ctx="dynamic_frame")
+
+glueContext.write_dynamic_frame.from_options(
+    frame = df2,
+    connection_type = "s3",
+    connection_options = {"path": 's3://data-lake-niwea/Refined/2023/06/15/tabela02/'},
+    format = "parquet",
+    transformation_ctx = "parquet_output")
+
+
+#terceira tabela
+database3 = 'filme'
+table3 = 'avaliacoes'
+
+df3 = glueContext.create_dynamic_frame.from_catalog(database=database3, table_name=table3, transformation_ctx="dynamic_frame")
+
+glueContext.write_dynamic_frame.from_options(
+    frame = df3,
+    connection_type = "s3",
+    connection_options = {"path": 's3://data-lake-niwea/Refined/2023/06/15/tabela03/'},
+    format = "parquet",
+    transformation_ctx = "parquet_output")
+
+#quarta tabela04
+database4 = 'filme'
+table4 = 'artista'
+df4 = glueContext.create_dynamic_frame.from_catalog(database=database4, table_name=table4, transformation_ctx="dynamic_frame")
+
+glueContext.write_dynamic_frame.from_options(
+    frame = df4,
+    connection_type = "s3",
+    connection_options = {"path": 's3://data-lake-niwea/Refined/2023/06/15/tabela04/'},
+    format = "parquet",
+    transformation_ctx = "parquet_output")
+job.commit()
